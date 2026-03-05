@@ -15,12 +15,9 @@ public class AuthorizeService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user=userMapper.selectByUsername(username);
-        System.out.println(user.getUserName());
-        System.out.println(user.getPassword());
         if(user==null){
-            System.out.println("1111111");
             throw new UsernameNotFoundException("用户名或密码错误");
         }
-        return org.springframework.security.core.userdetails.User.withUsername(username).password(user.getPassword()).build();
+        return user;
     }
 }

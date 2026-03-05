@@ -19,12 +19,27 @@ public class RESTBean<T> {
         bean.setData(data);
         return bean;
     }
+    public static <T> RESTBean<T> success(String msg,T data) {
+        RESTBean<T> bean=new RESTBean<>();
+        bean.setCode(200);
+        bean.setMsg(msg);
+        bean.setData(data);
+        return bean;
+    }
 
     public static <T> RESTBean<T> fail(Integer code,String msg, T data) {
         RESTBean<T> bean=new RESTBean<>();
         bean.setCode(code);
         bean.setMsg(msg);
         bean.setData(data);
+        return bean;
+    }
+
+    public static <T> RESTBean<T> fail(Integer code,String msg) {
+        RESTBean<T> bean=new RESTBean<>();
+        bean.setCode(code);
+        bean.setMsg(msg);
+        bean.setData(null);
         return bean;
     }
 

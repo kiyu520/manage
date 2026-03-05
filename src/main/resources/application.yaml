@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: manage
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: management
+    password: 20260228
+    url: jdbc:mysql://kiyuuu.top:3306/management
+server:
+  port: 2333
+jwt:
+  key: "123456"
+  past_time: 3600
+logging:
+  level:
+    org.springframework.security: DEBUG

@@ -5,16 +5,19 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import top.kiyuu.manage.entity.BlackList;
+import top.kiyuu.manage.entity.User;
+import top.kiyuu.manage.mapper.BlackListMapper;
+import top.kiyuu.manage.service.BlackListService;
+import top.kiyuu.manage.service.UserService;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JWTUtil {
@@ -23,14 +26,19 @@ public class JWTUtil {
     @Value("${jwt.past_time}")
     private int past_time;
 
+    @Resource
+    BlackListService  blackListService;
+
+    private static  final HashSet<String> blacklist = new HashSet<>();
     public String create(UserDetails user){
+        User u=(User)user;
         Algorithm algorithm = Algorithm.HMAC256(key);
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
         calendar.add(Calendar.SECOND,past_time);
         return JWT.create()
                 .withClaim("name",user.getUsername())
-                .withClaim("authorities", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .withClaim("roleId", u.getRoleId())
                 .withIssuedAt(now)
                 .withExpiresAt(calendar.getTime())
                 .sign(algorithm);
@@ -47,13 +55,24 @@ public class JWTUtil {
             }
             else {
                 System.out.println(claims.get("name").asString());
-                return User.withUsername(claims.get("name").asString())
-                        .password("")
-                        .authorities(claims.get("authorities").asArray(String.class))
-                        .build();
+                User u=new User();
+                u.setUserName(claims.get("name").asString());
+                u.setRoleId(claims.get("roleId").asInt());
+                return u;
             }
         }catch (Exception e) {
             return null;
         }
+    }
+
+    public boolean ban(String token){
+        if (blacklist.contains(token))return false;
+        blacklist.add(token);
+       blackListService.save(new BlackList(token));
+       return true;
+    }
+
+    public void init(){
+        blacklist.addAll(blackListService.list().stream().map(BlackList::getToken).collect(Collectors.toSet()));
     }
 }

@@ -29,9 +29,6 @@ public class JWTFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("Authentication set: " + SecurityContextHolder.getContext().getAuthentication());
-            } else {
-                System.out.println("User is null, token resolution failed");
             }
         }
         filterChain.doFilter(request, response);
