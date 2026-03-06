@@ -45,6 +45,7 @@ public class JWTUtil {
     }
 
     public UserDetails resolve(String token){
+        if (blacklist.contains(token)) return null;
         Algorithm algorithm = Algorithm.HMAC256(key);
         JWTVerifier verifier = JWT.require(algorithm).build();
         try {
@@ -55,6 +56,7 @@ public class JWTUtil {
             }
             else {
                 System.out.println(claims.get("name").asString());
+                System.out.println(claims.get("roleId").asInt());
                 User u=new User();
                 u.setUserName(claims.get("name").asString());
                 u.setRoleId(claims.get("roleId").asInt());
@@ -72,6 +74,9 @@ public class JWTUtil {
        return true;
     }
 
+    public boolean isBanned(String token){
+        return blacklist.contains(token);
+    }
     public void init(){
         blacklist.addAll(blackListService.list().stream().map(BlackList::getToken).collect(Collectors.toSet()));
     }

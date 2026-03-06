@@ -13,6 +13,7 @@ import top.kiyuu.manage.service.RoleService;
 import top.kiyuu.manage.service.UserService;
 import top.kiyuu.manage.util.RESTBean;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +29,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         User user = userMapper.selectByUsername(username);
         Role role= roleService.getById(user.getRoleId());
         map.put("id",user.getId());
-        map.put("username",user.getUsername());
-        map.put("roleId",user.getRoleId());
-        map.put("roleName",role.getRoleName());
-        map.put("deptName",user.getDeptName());
+        map.put("user_name",user.getUsername());
+        map.put("role_id",user.getRoleId());
+        map.put("role_name",role.getRoleName());
+        map.put("dept_name",user.getDeptName());
+        map.put("phone",user.getPhone());
         map.put("last_login_time",user.getLastLoginTime());
         return map;
     }
@@ -51,5 +53,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         }catch (Exception e){
             return RESTBean.fail(400,"修改失败");
         }
+    }
+
+    public void login(String username){
+        User user=userMapper.selectByUsername(username);
+        user.setLastLoginTime(LocalDateTime.now());
+        userMapper.updateById(user);
     }
 }

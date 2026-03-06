@@ -13,4 +13,5 @@ import java.util.Map;
 public interface UserService extends IService<User> {
     public Map<String,Object> getInfo(String username);
     public RESTBean<String> changePassword(Map<String,String> map, Authentication authentication, PasswordEncoder passwordEncoder);
+    public void login(String username);
 }

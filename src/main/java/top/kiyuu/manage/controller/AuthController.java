@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import top.kiyuu.manage.entity.User;
 import top.kiyuu.manage.service.UserService;
+import top.kiyuu.manage.util.JWTUtil;
 import top.kiyuu.manage.util.RESTBean;
 
 import java.time.LocalDateTime;
@@ -18,12 +19,13 @@ public class AuthController {
     UserService userService;
     @Resource
     PasswordEncoder PasswordEncoder;
-
+    @Resource
+    JWTUtil  jwtUtil;
 
     //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PostMapping("/register")
-    public String register(String username,String password,Integer role_id){
-        userService.save(new User(username,role_id,PasswordEncoder.encode(password),"测试部","123123123",LocalDateTime.now()));
+    public String register(String username,String password,Integer role_id,String dept_name,String phone){
+        userService.save(new User(username,role_id,PasswordEncoder.encode(password),dept_name,phone,LocalDateTime.now()));
         return "success";
     }
 
@@ -38,5 +40,11 @@ public class AuthController {
     @PostMapping("/password")
     public RESTBean<String> changePassword(@RequestBody Map<String,String> map,Authentication authentication){
         return userService.changePassword(map,authentication,PasswordEncoder);
+    }
+
+    @GetMapping("/refresh")
+    public RESTBean<String> refreshToken(Authentication authentication){
+        //这里大概有被反复请求的风险,但是回头再说(
+        return RESTBean.success(jwtUtil.create((User)(authentication.getPrincipal())));
     }
 }

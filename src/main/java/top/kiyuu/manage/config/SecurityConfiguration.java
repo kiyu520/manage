@@ -59,7 +59,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll()
-                        //.requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> {
                     form.loginProcessingUrl("/api/auth/login");
@@ -67,7 +67,7 @@ public class SecurityConfiguration {
                     form.failureHandler(this::handleProcess);
                     form.permitAll();
                 })
-                .logout(logout -> logout.logoutUrl("/api/auth/logout").logoutSuccessUrl("/").permitAll())
+                .logout(logout -> logout.logoutUrl("/api/auth/logout").addLogoutHandler(this::onLogout).permitAll())
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(conf -> {
@@ -91,4 +91,22 @@ public class SecurityConfiguration {
         }
     }
 
+    private void onLogout(HttpServletRequest request, HttpServletResponse response, Object exceptionOrAuthentication){
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        try(PrintWriter writer = response.getWriter();){
+            String authorization = request.getHeader("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                String token = authorization.substring(7);
+                if (jwtUtil.ban(token)) {
+                    writer.write(RESTBean.success("退出登录成功",null).toJsonString());
+                    return;
+                }
+            }
+            writer.write(RESTBean.fail(400,"退出登录失败").toJsonString());
+        } catch (IOException ignored) {
+
+        }
+
+    }
 }

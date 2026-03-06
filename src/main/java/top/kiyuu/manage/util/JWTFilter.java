@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import top.kiyuu.manage.service.UserService;
 
 import java.io.IOException;
 
@@ -18,6 +19,8 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
     @Resource
     JWTUtil jwtUtil;
+    @Resource
+    UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -26,6 +29,7 @@ public class JWTFilter extends OncePerRequestFilter {
             String token = authorization.substring(7);
             UserDetails user= jwtUtil.resolve(token);
             if (user != null) {
+                userService.login(user.getUsername());
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);

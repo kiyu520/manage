@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: management
     password: 20260228
-    url: jdbc:mysql://kiyuuu.top:3306/management
+    url: jdbc:mysql://120.27.9.152:3306/management
 server:
   port: 2333
 jwt:

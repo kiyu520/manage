@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import top.kiyuu.manage.entity.User;
 import top.kiyuu.manage.mapper.UserMapper;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthorizeService implements UserDetailsService {
     @Resource
@@ -18,6 +20,8 @@ public class AuthorizeService implements UserDetailsService {
         if(user==null){
             throw new UsernameNotFoundException("用户名或密码错误");
         }
+        user.setLastLoginTime(LocalDateTime.now());
+        userMapper.updateById(user);
         return user;
     }
 }

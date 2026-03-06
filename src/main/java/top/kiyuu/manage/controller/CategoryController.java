@@ -8,8 +8,10 @@ import top.kiyuu.manage.service.CategoryService;
 import top.kiyuu.manage.util.RESTBean;
 
 import java.util.List;
+import java.util.Map;
 
-@RestController("/api/category")
+@RestController
+@RequestMapping("/api/category")
 public class CategoryController {
     @Resource
     CategoryService categoryService;
@@ -23,14 +25,19 @@ public class CategoryController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PostMapping("/")
-    public RESTBean<Category> addCategory(@RequestBody String category_name){
-        if (categoryService.save(new Category(category_name)))return RESTBean.success("添加成功",categoryService.getCategoryByName(category_name));
+    public RESTBean<Map<String,Object>> addCategory(@RequestBody Map<String,String> map){
+        String category_name=map.get("category_name");
+        if (categoryService.save(new Category(category_name))){
+            Category category = categoryService.getCategoryByName(category_name);
+            return RESTBean.success("添加成功",Map.of("id",category.getId(),"category_name",category.getCategoryName()));
+        }
         else return RESTBean.fail(500,"添加失败");
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PutMapping("/{id}")
-    public RESTBean<Category> updateCategory(@RequestBody String category_name, @PathVariable int id){
+    public RESTBean<Category> updateCategory(@RequestBody Map<String,String> map, @PathVariable int id){
+        String category_name=map.get("category_name");
         Category category = categoryService.updateCategory(id, category_name);
         if (category==null)return RESTBean.fail(400,"id不存在");
         else return RESTBean.success(category);
